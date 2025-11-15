@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather & Rainfall Prediction App</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Weather & Rainfall Prediction</h1>
+        <input type="text" id="cityInput" placeholder="Enter you village">
+        <button id="searchBtn">Get Weather</button>
+
+        <!-- Current Weather Info -->
+        <div id="weatherInfo" class="hidden">
+            <h2 id="cityName"></h2>
+            <p id="temp"></p>
+            <p id="condition"></p>
+            <p id="humidity"></p>
+            <p id="wind"></p>
+            <p id="rainProb"></p>
+        </div>
+
+        <!-- 5-Day Forecast Chart -->
+        <canvas id="forecastChart" width="400" height="200" class="hidden"></canvas>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
