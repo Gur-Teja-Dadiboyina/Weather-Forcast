@@ -81,20 +81,20 @@ pipeline {
                         timeout(time: 5, unit: 'MINUTES') { // wait max 5 mins
                             waitUntil {
                                 svc = sh(
-                                    script: "kubectl get svc python-login-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'",
+                                    script: "kubectl get svc weather-app-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'",
                                     returnStdout: true
                                 ).trim()
                                 if (!svc) {
                                     // fallback to IP if hostname not available
                                     svc = sh(
-                                        script: "kubectl get svc python-login-service -o jsonpath='{.status.loadBalancer.ingress[0].ip}'",
+                                        script: "kubectl get svc weather-app-service -o jsonpath='{.status.loadBalancer.ingress[0].ip}'",
                                         returnStdout: true
                                     ).trim()
                                 }
                                 return svc != "" // proceed only when LoadBalancer is ready
                             }
                         }
-                        echo "Your app should be available at http://${svc}:8082"
+                        echo "Your app should be available at http://${svc}:3000"
                     }
                 }
             }
