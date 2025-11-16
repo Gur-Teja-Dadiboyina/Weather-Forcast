@@ -1,0 +1,104 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE = "guruteja934/weather-app"
+        VERSION = "v12-${new Date().format('yyyyMMdd-HHmm')}"
+    }
+
+    stages {
+        stage('Checkout SCM') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh """
+                docker build -t ${DOCKER_IMAGE}:${VERSION} .
+                """
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-credentials', 
+                    usernameVariable: 'DOCKER_USER', 
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh """
+                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                    docker push ${DOCKER_IMAGE}:${VERSION}
+                    docker logout
+                    """
+                }
+            }
+        }
+
+        stage('Update Deployment YAML') {
+            steps {
+                sh "sed -i 's|image: .*|image: ${DOCKER_IMAGE}:${VERSION}|' deployment.yaml"
+            }
+        }
+
+        stage('Configure AWS & Kubeconfig') {
+            steps {
+                withCredentials([[ 
+                    $class: 'AmazonWebServicesCredentialsBinding', 
+                    credentialsId: 'aws-eks-creds' 
+                ]]) {
+                    sh """
+                    aws eks update-kubeconfig --name my-eks-cluster --region ap-south-1
+                    """
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                withCredentials([[ 
+                    $class: 'AmazonWebServicesCredentialsBinding', 
+                    credentialsId: 'aws-eks-creds' 
+                ]]) {
+                    sh """
+                    kubectl apply -f deployment.yaml
+                    kubectl apply -f service.yaml
+                    """
+                }
+            }
+        }
+
+        stage('Print Public URL') {
+            steps {
+                withCredentials([[ 
+                    $class: 'AmazonWebServicesCredentialsBinding', 
+                    credentialsId: 'aws-eks-creds' 
+                ]]) {
+                    script {
+                        def svc = ""
+                        timeout(time: 5, unit: 'MINUTES') { // wait max 5 mins
+                            waitUntil {
+                                svc = sh(
+                                    script: "kubectl get svc python-login-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'",
+                                    returnStdout: true
+                                ).trim()
+                                if (!svc) {
+                                    // fallback to IP if hostname not available
+                                    svc = sh(
+                                        script: "kubectl get svc python-login-service -o jsonpath='{.status.loadBalancer.ingress[0].ip}'",
+                                        returnStdout: true
+                                    ).trim()
+                                }
+                                return svc != "" // proceed only when LoadBalancer is ready
+                            }
+                        }
+                        echo "Your app should be available at http://${svc}:8082"
+                    }
+                }
+            }
+        }
+
+    } // end of stages
+} // end of pipeline
