@@ -4,6 +4,7 @@ pipeline {
     environment {
         DOCKER_IMAGE = "guruteja934/weather-app"
         VERSION = "v12-${new Date().format('yyyyMMdd-HHmm')}"
+        WEATHER_API_KEY = "3e8df3c085b94385878173516251411"
     }
 
     stages {
@@ -51,6 +52,24 @@ pipeline {
                 ]]) {
                     sh """
                     aws eks update-kubeconfig --name my-eks-cluster --region ap-south-1
+                    """
+                }
+            }
+        }
+
+        stage('Init Kubernetes Secret') {
+            steps {
+                withCredentials([[ 
+                    $class: 'AmazonWebServicesCredentialsBinding', 
+                    credentialsId: 'aws-eks-creds' 
+                ]]) {
+                    sh """
+                    if ! kubectl get secret weather-api-key >/dev/null 2>&1; then
+                      kubectl create secret generic weather-api-key \\
+                        --from-literal=WEATHER_API_KEY=${WEATHER_API_KEY}
+                    else
+                      echo "Secret weather-api-key already exists"
+                    fi
                     """
                 }
             }
