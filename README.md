@@ -21,7 +21,44 @@ A full-stack weather forecast web application built with **Node.js, Express, HTM
 
 1. **Clone the repository:**
 <prep>
-git clone https://github.com/Gur-Teja-Dadiboyina/Weather-Forcast.git
+git clone https://github.com/Gur-Teja-Dadiboyina/Weather-Forcast.git 
 cd Weather-Forcast
 </prep>
-2.
+
+2.Set your WeatherAPI key as an environment variable:
+export WEATHER_API_KEY=your_api_key_here
+
+3.Run the server:
+npm install
+node backend.js
+
+4.Access the app:
+Open http://localhost:3000 in your browser.
+
+Docker
+1.Build the Docker image:
+docker build -t weather-forecast-app .
+
+2.Run the container:
+docker run -p 3000:3000 -e WEATHER_API_KEY=your_api_key_here weather-forecast-app
+
+3.Access the app: http://localhost:3000
+
+Notes
+
+Replace the default API key with your own. Never expose API keys in public repos.
+
+CORS is enabled for all origins; restrict in production environments.
+
+Add caching or rate-limiting for production use to avoid exceeding API limits.
+
+License
+
+Specify your license here (e.g., MIT, Apache 2.0, etc.)
+
+---
+
+I can also **create a LinkedIn/resume-ready version** that’s even shorter and punchier, showing this project as a **skill showcase**, if you want.  
+
+Do you want me to create that version too?
+
