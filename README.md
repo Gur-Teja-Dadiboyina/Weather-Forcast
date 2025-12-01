@@ -17,6 +17,11 @@ A full-stack weather forecast web application built with **Node.js, Express, HTM
 - DevOps: Docker, Kubernetes, environment variables
 - Error handling, CORS, and asynchronous programming
 
+## Screenshot
+![Weather Forecast App Screenshot]
+<img width="637" height="901" alt="Screenshot 2025-11-15 215441" src="https://github.com/user-attachments/assets/ac3fabda-a7df-47eb-9547-18ced0f42bf0" />
+
+
 ## Setup Instructions
 
 **Clone the repository:**
